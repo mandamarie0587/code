@@ -1,0 +1,8 @@
+*.dll
+*.pdb
+*.mdb
+*.exe
+.DS_Store
+*/obj
+*/bin
+packages/

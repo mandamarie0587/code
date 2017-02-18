@@ -36,15 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\Prefab\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -52,6 +44,40 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LoveSeat">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.dll</HintPath>
+    </Reference>
+    <Reference Include="LoveSeat.Interfaces">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dynamic">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net40\Microsoft.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net40\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net40\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net40\Microsoft.Scripting.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython">
+      <HintPath>..\packages\IronPython.2.7.7\lib\Net40\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.Modules">
+      <HintPath>..\packages\IronPython.2.7.7\lib\Net40\IronPython.Modules.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.SQLite">
+      <HintPath>..\packages\IronPython.2.7.7\lib\Net40\IronPython.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.Wpf">
+      <HintPath>..\packages\IronPython.2.7.7\lib\Net40\IronPython.Wpf.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChainLoader.cs" />
@@ -69,7 +95,7 @@
       <Name>PrefabUtils</Name>
     </ProjectReference>
     <ProjectReference Include="..\Prefab\Prefab.csproj">
-      <Project>{60000F87-DB72-4859-88F8-222985CCBB61}</Project>
+      <Project>{8F7273ED-3F04-43C1-A1C8-EB8145F1FF5F}</Project>
       <Name>Prefab</Name>
     </ProjectReference>
   </ItemGroup>
@@ -83,6 +109,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

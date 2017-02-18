@@ -51,6 +51,9 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			return total;
 		}
 
+		// Circles 
+
+
 		private double GetHeuristicCost(string name, Part part, Dictionary<string, Part> assignment, Dictionary<object, object> cache)
 		{
 			switch (name)

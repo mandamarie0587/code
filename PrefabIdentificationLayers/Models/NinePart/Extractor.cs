@@ -55,7 +55,7 @@ namespace PrefabIdentificationLayers.Models.NinePart
 					extracted = CropFromManyRelativeBottomLeft(size.Height, 0, size.Width, size.Height, positives);
 					break;
 
-				case "topright":
+					case "topright":
 					extracted = CropFromManyRelativeTopRight(0, size.Width, size.Width, size.Height, positives);
 					break;
 

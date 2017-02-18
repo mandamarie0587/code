@@ -32,18 +32,20 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LoveSeat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\prefab_identification_layers\LoveSeat.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="Newtonsoft.Json">
-      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="LoveSeat">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.dll</HintPath>
+    </Reference>
+    <Reference Include="LoveSeat.Interfaces">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.Interfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +74,14 @@
     <Compile Include="Point.cs" />
     <Compile Include="CouchDbAnnotation.cs" />
     <Compile Include="CouchDbIntentData.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AdobePreferences.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

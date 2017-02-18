@@ -38,7 +38,9 @@ namespace PrefabIdentificationLayers.Prototypes
 
 			Dictionary<String, Bitmap> features = new Dictionary<String, Bitmap>();
 			Dictionary<String, Region> regions = new Dictionary<String, Region>();
-
+			// Not using a model to create the prototype
+			// Building one from the model 
+			// Mutable is a prototype that is mutable (can be changed) 
 			features.Add("topleft", feature);
 			features.Add("topright", feature2);
 			features.Add("bottomleft", feature3);
@@ -72,6 +74,8 @@ namespace PrefabIdentificationLayers.Prototypes
 
 		public static List<Mutable> BuildFromExamples(List<BuildPrototypeArgs> args)
 		{
+			// Creates a prototype from an image
+
 			List<Mutable> created = new List<Mutable>();
             List<BuildPrototypeArgs> couldntCreate = new List<BuildPrototypeArgs>();
 			foreach (BuildPrototypeArgs arg in args)
@@ -214,6 +218,106 @@ namespace PrefabIdentificationLayers.Prototypes
 			return regions.Values;
 		}
 
+		public class Mutable
+		{
+
+			public Dictionary<string, Bitmap> Features;
+
+			public Dictionary<string, Region> Regions;
+
+			public String Model;
+
+			public string Id;
+
+			public Mutable()
+			{
+				Features = new Dictionary<String, Bitmap>();
+
+				Regions = new Dictionary<String, Region>();
+			}
+			public Mutable(Dictionary<string, Bitmap> features, Dictionary<string, Region> regions)
+			{
+				List<Bitmap> fcpy = new List<Bitmap>();
+				foreach (Bitmap f in features.Values)
+				{
+
+					Bitmap cpy = Bitmap.SetTransparentValues(f);
+					if (Bitmap.AllTransparent(cpy))
+					{
+						throw new Exception("Cannot create an all transparent Bitmap.");
+					}
+
+					fcpy.Add(cpy);
+				}
+
+
+
+				this.Features = new Dictionary<string, Bitmap>(features);
+				this.Regions = new Dictionary<string, Region>(regions);
+			}
+
+			public Mutable(Ptype ptype)
+			{
+				Features = new Dictionary<String, Bitmap>();
+
+				foreach (string fname in ptype.FeatureNames())
+					Features.Add(fname, ptype.Feature(fname).Bitmap);
+
+				Regions = new Dictionary<String, Region>();
+				foreach (string rname in ptype.RegionNames())
+					Regions.Add(rname, ptype.Region(rname));
+
+				Id = ptype.Id;
+
+				Model = ptype.Model.Name;
+			}
+
+			public static Mutable DeepCopy(Mutable ptype)
+			{
+				Mutable copy = null;
+				if (ptype is Ptype.Hierarchical.HierarchicalMutable)
+				{
+					Ptype.Hierarchical.HierarchicalMutable hp = (Ptype.Hierarchical.HierarchicalMutable)ptype;
+					copy = new Ptype.Hierarchical.HierarchicalMutable();
+					Ptype.Hierarchical.HierarchicalMutable hpcopy = (Ptype.Hierarchical.HierarchicalMutable)copy;
+					hpcopy.children.AddRange(hp.children);
+					hpcopy.childrenNames.AddRange(hp.childrenNames);
+				}
+
+				else
+				{
+					copy = new Mutable();
+				}
+
+				copy.Regions = (Dictionary<String, Region>)ptype.Regions;
+				copy.Features = (Dictionary<String, Bitmap>)ptype.Features;
+				copy.Model = ptype.Model;
+				copy.Id = ptype.Id;
+
+				return copy;
+			}
+
+
+
+			public override int GetHashCode()
+			{
+
+				return Id.GetHashCode();
+			}
+
+
+			public override bool Equals(object obj)
+			{
+
+				if (obj is Mutable)
+				{
+					return ((Mutable)obj).Id.Equals(Id);
+				}
+
+				return false;
+			}
+		}
+
 		public sealed class Hierarchical : Ptype
 		{
 
@@ -237,7 +341,7 @@ namespace PrefabIdentificationLayers.Prototypes
 				return children.Values;
 			}
 
-		
+
 			public sealed class HierarchicalMutable : Mutable
 			{
 				public HierarchicalMutable() : base()
@@ -271,108 +375,6 @@ namespace PrefabIdentificationLayers.Prototypes
 
 		}
 
-		public class Mutable
-		{
-
-			public Dictionary<string, Bitmap>  Features;
-
-			public Dictionary<string, Region> Regions;
-
-			public String Model;
-
-			public string Id;
-
-			public Mutable()
-			{
-				Features = new Dictionary<String, Bitmap>();
-
-				Regions = new Dictionary<String, Region>();
-			}
-			public Mutable(Dictionary<string, Bitmap> features, Dictionary<string, Region> regions)
-			{
-				List<Bitmap> fcpy = new List<Bitmap>();
-				foreach (Bitmap f in features.Values)
-				{
-
-					Bitmap cpy = Bitmap.SetTransparentValues(f);
-					if (Bitmap.AllTransparent(cpy)) {
-						throw new Exception("Cannot create an all transparent Bitmap.");
-					}
-
-					fcpy.Add(cpy);
-				}
-
-
-
-				this.Features = new Dictionary<string,Bitmap>(features);
-				this.Regions = new Dictionary<string, Region>(regions);
-			}
-
-			public Mutable(Ptype ptype)
-			{
-				Features = new Dictionary<String,Bitmap>();
-
-				foreach(string fname in ptype.FeatureNames())
-					Features.Add(fname, ptype.Feature(fname).Bitmap);
-
-				Regions = new Dictionary<String,Region>();
-				foreach(string rname in ptype.RegionNames())
-					Regions.Add(rname, ptype.Region(rname));
-
-				Id = ptype.Id;
-
-				Model = ptype.Model.Name;
-			}
-
-			public static Mutable DeepCopy(Mutable ptype)
-			{
-				Mutable copy = null;
-				if (ptype is Ptype.Hierarchical.HierarchicalMutable)
-				{
-					Ptype.Hierarchical.HierarchicalMutable hp = (Ptype.Hierarchical.HierarchicalMutable) ptype;
-					copy = new Ptype.Hierarchical.HierarchicalMutable();
-					Ptype.Hierarchical.HierarchicalMutable hpcopy = (Ptype.Hierarchical.HierarchicalMutable)copy;
-					hpcopy.children.AddRange(hp.children);
-					hpcopy.childrenNames.AddRange(hp.childrenNames);
-				}
-
-				else
-				{
-					copy = new Mutable();
-				}
-
-				copy.Regions = (Dictionary<String,Region>)ptype.Regions;
-				copy.Features = (Dictionary<String,Bitmap>)ptype.Features;
-				copy.Model = ptype.Model;
-				copy.Id = ptype.Id;
-
-				return copy;
-			}
-
-
-
-			public override int GetHashCode()
-			{
-
-				return Id.GetHashCode();
-			}
-
-
-			public override bool Equals(object obj)
-			{
-
-				if (obj is Mutable)
-				{
-					return ((Mutable)obj).Id.Equals(Id);
-				}
-
-				return false;
-			}
-		}
-
-
-
-
 		public static Mutable ToMutable(Ptype ptype)
 		{
 
@@ -393,6 +395,11 @@ namespace PrefabIdentificationLayers.Prototypes
 
 		public static List<Ptype> CreatePrototypeLibrary(IEnumerable<Mutable> buildargs)
 		{
+			// Give it a list of mutable prototypes
+			// Build own main method 
+			// When run it, it calls LoadDummy() and dump out model 
+			// Save corners and edges to json
+
 			List<Ptype> ptypes = new List<Ptype>();
 			Feature.Factory features = new Feature.Factory();
 
@@ -407,6 +414,28 @@ namespace PrefabIdentificationLayers.Prototypes
 
 		private static Ptype CreatePtypeFromMutable(Mutable prototypebuildargs, Model[] models, Feature.Factory features, IEnumerable<Mutable> allptypes)
 		{
+			//  9 part model 
+			// Has 4 features (corners) 
+			// 5 regions
+			// Regions are the edges
+			// Has an interiour
+			// Find single color for the background
+			// or single repeating-gradient
+			// Regions and Features
+			// Background will be a Region with a bitmap 
+			// Has some logic 
+			// First thing
+			// Load dummy
+			// Give a adifferent example
+			// white rectangle with grey border
+			// Use 9 part model 
+			// Build from examples
+			// 
+			// Circles
+			//    Crop square out of the middle? 
+			//    can we follow a circle around the outside? 
+			// Lines
+			//    Might be 
 			Dictionary<string, Bitmap> ptypefeatureshash = prototypebuildargs.Features;
 			Dictionary<string,Feature> ptypefeatures = new Dictionary<string, Feature>();
 

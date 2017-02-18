@@ -15,6 +15,13 @@ namespace PrefabIdentificationLayers.Models{
 		private Examples examples;
 		public BuildPrototypeArgs(Examples examples, Model model, string id)
 		{
+			// Model will create a prototype
+			// 9 part model will generate a 9-part prototype
+			// Give it an example
+			// It will create a prototype for you 
+			// Need to specifiy the model you want to build from 
+			// Use the Nine Part model for now
+			// Take a simple rectangle and build a nine part model 
 			this.Id = id;
 			this.examples = examples;
 			this.Model = model;

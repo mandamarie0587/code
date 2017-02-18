@@ -6,9 +6,10 @@
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A2C59518-A870-444A-AADF-3968164C705B}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>PrefabIdentificationLayers</RootNamespace>
     <AssemblyName>PrefabIdentificationLayers</AssemblyName>
+    <StartupObject>PrefabIdentificationLayers.Reclaim</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -19,23 +20,31 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <Commandlineparameters>rectangle_orange.png</Commandlineparameters>
     <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\PrefabLayers\bin\Debug\layers\prefab_identification</OutputPath>
+    <OutputPath>..\prefab_identification_layers</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\Prefab\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="LoveSeat">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.dll</HintPath>
+    </Reference>
+    <Reference Include="LoveSeat.Interfaces">
+      <HintPath>..\packages\LoveSeat.1.0.1\lib\net40\LoveSeat.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\VerticalScroll\Builder.cs" />
@@ -92,12 +101,27 @@
     <Compile Include="Features\FeatureTree\InnerFeatureTreeNode.cs" />
     <Compile Include="Features\FeatureTree\LeafFeatureTreeNode.cs" />
     <Compile Include="Features\FeatureTree\GraphUtilities.cs" />
+    <Compile Include="Prototypes\MutablePtype.cs" />
+    <Compile Include="Reclaim.cs" />
+    <Compile Include="Shapes\Rectangle.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Prefab\Prefab.csproj">
       <Project>{8f7273ed-3f04-43c1-a1c8-eb8145f1ff5f}</Project>
       <Name>Prefab</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="rectangle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="rectangle_orange.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Shapes\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

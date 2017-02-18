@@ -304,17 +304,18 @@ namespace PrefabUtils
                             _curr.X += deltx;
                             _curr.Y += delty;
 
-                            #region clip to the screen bounds
-                            if (_curr.X < 0)
-                                _curr.X = 0;
-                            else if (_curr.X >= System.Windows.SystemParameters.VirtualScreenWidth)
-                                _curr.X = (int)System.Windows.SystemParameters.VirtualScreenWidth - 1;
+							// AMS: Commenting out due to build issues and need replacement for Mac
+                            //#region clip to the screen bounds
+                            //if (_curr.X < 0)
+                            //    _curr.X = 0;
+                            //else if (_curr.X >= System.Windows.SystemParameters.VirtualScreenWidth)
+                            //    _curr.X = (int)System.Windows.SystemParameters.VirtualScreenWidth - 1;
 
-                            if (_curr.Y < 0)
-                                _curr.Y = 0;
-                            else if (_curr.Y >= System.Windows.SystemParameters.VirtualScreenHeight)
-                                _curr.Y = (int)System.Windows.SystemParameters.VirtualScreenHeight - 1;
-                            #endregion
+                            //if (_curr.Y < 0)
+                            //    _curr.Y = 0;
+                            //else if (_curr.Y >= System.Windows.SystemParameters.VirtualScreenHeight)
+                            //    _curr.Y = (int)System.Windows.SystemParameters.VirtualScreenHeight - 1;
+                            //#endregion
 
                         }
                         break;
@@ -335,18 +336,19 @@ namespace PrefabUtils
 
                             _prev = _physicalCursorLocation;
 
-                            #region clip to the screen bounds
-                            if (_curr.X < 0)
-                                _curr.X = 0;
-                            else if (_curr.X >= System.Windows.SystemParameters.VirtualScreenWidth)
-                                _curr.X = (int)System.Windows.SystemParameters.VirtualScreenWidth - 1;
+							// AMS: Commmenting out due to build issues, and need replacement for Mac
+                            //#region clip to the screen bounds
+                            //if (_curr.X < 0)
+                            //    _curr.X = 0;
+                            //else if (_curr.X >= System.Windows.SystemParameters.VirtualScreenWidth)
+                            //    _curr.X = (int)System.Windows.SystemParameters.VirtualScreenWidth - 1;
 
-                            if (_curr.Y < 0)
-                                _curr.Y = 0;
-                            else if (_curr.Y >= System.Windows.SystemParameters.VirtualScreenHeight)
-                                _curr.Y = (int)System.Windows.SystemParameters.VirtualScreenHeight - 1;
-                            #endregion
-                            Win32.SetCursorPos(_physicalCursorLocation.X, _physicalCursorLocation.Y);
+                            //if (_curr.Y < 0)
+                            //    _curr.Y = 0;
+                            //else if (_curr.Y >= System.Windows.SystemParameters.VirtualScreenHeight)
+                            //    _curr.Y = (int)System.Windows.SystemParameters.VirtualScreenHeight - 1;
+                            //#endregion
+                            //Win32.SetCursorPos(_physicalCursorLocation.X, _physicalCursorLocation.Y);
                         }
                         break;
                 }

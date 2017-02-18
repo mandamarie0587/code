@@ -1,0 +1,51 @@
+﻿<Properties StartupConfiguration="{A2C59518-A870-444A-AADF-3968164C705B}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="IORedirectionUtils/LowLevelMouseHook.cs">
+    <Files>
+      <File FileName="PrefabIdentificationLayers/Models/NinePart/Extractor.cs" Line="101" Column="3" />
+      <File FileName="Prefab/Bitmap.cs" Line="24" Column="16" />
+      <File FileName="PrefabIdentificationLayers/Shapes/Rectangle.cs" Line="122" Column="32" />
+      <File FileName="Prefab/CouchDbAnnotation.cs" Line="4" Column="1" />
+      <File FileName="PrefabIdentificationLayers/Reclaim.cs" Line="101" Column="26" />
+      <File FileName="PrefabIdentificationLayers/Prototypes/PtypeSerializationUtility.cs" Line="20" Column="3" />
+      <File FileName="IORedirectionUtils/LowLevelMouseHook.cs" Line="338" Column="5" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Prefab" expanded="True">
+            <Node name="Prefab" expanded="True" />
+            <Node name="PrefabIdentificationLayers" expanded="True">
+              <Node name="References" expanded="True" />
+              <Node name="Packages" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="NinePart" expanded="True" />
+              </Node>
+              <Node name="Prototypes" expanded="True" />
+              <Node name="Regions" expanded="True" />
+              <Node name="Shapes" expanded="True" />
+            </Node>
+            <Node name="PrefabUtils" expanded="True">
+              <Node name="LowLevelMouseHook.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/Features/FeatureDetectionLayer.cs" line="50" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/Prefab/Run.cs" line="44" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/BuildPrototypeFromImage.cs" line="16" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/BuildPrototypeFromImage.cs" line="18" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/BuildPrototypeFromImage.cs" line="23" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/Run.cs" line="63" column="24" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/Reclaim.cs" line="89" column="1" />
+      <Breakpoint file="/Users/Amanda/Documents/GitHub/code/PrefabIdentificationLayers/Reclaim.cs" line="78" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.PrefabIdentificationLayers PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.ItemProperties.Prefab PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

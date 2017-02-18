@@ -42,8 +42,6 @@ namespace Prefab
 			set;
 		}
 
-
-
 		/// <summary>
 		/// Contstructs a bitmap with Width and Height set to 0 and
 		/// no internal pixels. This is mainly to support serialization.
