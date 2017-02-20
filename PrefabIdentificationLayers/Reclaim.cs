@@ -66,6 +66,7 @@ namespace PrefabIdentificationLayers
 					try
 					{
 						// Create a new Bitmap 
+						Console.WriteLine(args[i]); 
 						Bitmap bitmap = Bitmap.FromFile(args[i]);
 						BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap);
 						Ptype.Mutable result = Ptype.BuildFromExamples(ptypeArgs);
@@ -87,6 +88,7 @@ namespace PrefabIdentificationLayers
 				}
 
 				string output = JsonConvert.SerializeObject(results);
+				Console.WriteLine("hello"); 
 				Console.WriteLine(output);
 			}
 

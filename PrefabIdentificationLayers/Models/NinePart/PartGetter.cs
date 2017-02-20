@@ -12,8 +12,8 @@ namespace PrefabIdentificationLayers.Models.NinePart
 	internal class PartGetter : IPartGetter, IConstraintGetter
 	{
 
-		private const int c_maxCornerSize = 6;
-		private const int c_minCornerSize = 2;
+		private const int c_maxCornerSize = 10;
+		private const int c_minCornerSize = 0;
 
 
 		public static readonly PartGetter Instance = new PartGetter();
