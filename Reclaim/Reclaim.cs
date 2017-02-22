@@ -2,11 +2,9 @@
 using System;
 using Prefab;
 using System.Collections.Generic;
-
-
-using PrefabIdentificationLayers.Models;
+using PrefabModels = PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers.Prototypes;
-using Newtonsoft.Json.Linq;
+using ReclaimModels = Reclaim.Models;
 using Newtonsoft.Json;
 
 namespace Reclaim
@@ -67,7 +65,7 @@ namespace Reclaim
 					{
 						// Create a new Bitmap 
 						Bitmap bitmap = Bitmap.FromFile(args[i]);
-						BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap);
+						PrefabModels.BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap);
 						Ptype.Mutable result = Ptype.BuildFromExamples(ptypeArgs);
 						if (result != null)
 						{
@@ -112,7 +110,7 @@ namespace Reclaim
 		}
 
 		// construct prototype args from thew bitmap image
-		public static BuildPrototypeArgs GetPrototypeArgsForImage(Bitmap bitmap)
+		public static PrefabModels.BuildPrototypeArgs GetPrototypeArgsForImage(Bitmap bitmap)
 		{
 			string id = Guid.NewGuid().ToString();
 
@@ -120,9 +118,9 @@ namespace Reclaim
 			List<Bitmap> positives = new List<Bitmap>();
 			List<Bitmap> negatives = new List<Bitmap>();
 			positives.Add(bitmap);
-			Examples examples = new Examples(positives, negatives);
+			PrefabModels.Examples examples = new PrefabModels.Examples(positives, negatives); 
+			PrefabModels.BuildPrototypeArgs args = new PrefabModels.BuildPrototypeArgs(examples, ReclaimModels.ModelInstances.SixPart, id);
 
-			BuildPrototypeArgs args = new BuildPrototypeArgs(examples, ModelInstances.NinePart, id);
 			return args;
 		}
 
@@ -131,36 +129,12 @@ namespace Reclaim
 			// Convert features topleft,topright,bottomleft,bottomright to their corresponding corner radius values
 			Rectangle myRectangle = new Rectangle(id);
 
-			// topleft corner radius
-			Bitmap topLeft = null;
-			if (prototype.Features.TryGetValue("topleft", out topLeft))
+			// Corner radius
+			Bitmap corner = null;
+			if (prototype.Features.TryGetValue("corner", out corner))
 			{
-				int topLeftRadius = (topLeft.Height + topLeft.Width) / 2;
-				myRectangle.BorderRadius.TopLeft = topLeftRadius;
-			}
-
-			// bottomLeft corner radius
-			Bitmap bottomLeft = null;
-			if (prototype.Features.TryGetValue("bottomleft", out bottomLeft))
-			{
-				int bottomLeftRadius = (bottomLeft.Height + bottomLeft.Width) / 2;
-				myRectangle.BorderRadius.BottomLeft = bottomLeftRadius;
-			}
-
-			// topRight corner radius
-			Bitmap topRight = null;
-			if (prototype.Features.TryGetValue("topright", out topRight))
-			{
-				int topRightRadius = (topRight.Height + topRight.Width) / 2;
-				myRectangle.BorderRadius.TopRight = topRightRadius;
-			}
-
-			// bottomRight corner radius
-			Bitmap bottomRight = null;
-			if (prototype.Features.TryGetValue("bottomright", out bottomRight))
-			{
-				int bottomRightRadius = (bottomRight.Height + bottomRight.Width) / 2;
-				myRectangle.BorderRadius.BottomRight = bottomRightRadius;
+				int cornerRadius = (corner.Height + corner.Width) / 2;
+				myRectangle.BorderRadius.Corner = cornerRadius;
 			}
 
 			//  Get border width, border color from the extracted side regions

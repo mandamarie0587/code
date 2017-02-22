@@ -90,37 +90,13 @@ namespace Reclaim
 	[JsonObject]
 	public class Radius
 	{
-		public Radius(int topLeft = 0, int topRight = 0, int bottomLeft = 0, int bottomRight = 0)
+		public Radius(int corner = 0)
 		{
-			this.TopLeft = topLeft;
-			this.TopRight = topRight;
-			this.BottomLeft = bottomLeft;
-			this.BottomRight = bottomRight; 
+			this.Corner = corner;
 		}
 
-		[JsonProperty("topLeft")]
-		public int TopLeft
-		{
-			get;
-			set; 
-		}
-
-		[JsonProperty("topRight")]
-		public int TopRight
-		{
-			get;
-			set; 
-		}
-
-		[JsonProperty("bottomLeft")]
-		public int BottomLeft
-		{
-			get;
-			set; 
-		}
-
-		[JsonProperty("bottomRight")]
-		public int BottomRight
+		[JsonProperty("corner")]
+		public int Corner
 		{
 			get;
 			set; 

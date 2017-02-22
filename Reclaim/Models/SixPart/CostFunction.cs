@@ -1,9 +1,12 @@
 using System;
 using Prefab;
 using System.Collections.Generic;
+using PrefabIdentificationLayers;
 using PrefabIdentificationLayers.Regions;
+using PrefabIdentificationLayers.Models;
+using PrefabIdentificationLayers.Models.NinePart; 
 
-namespace PrefabIdentificationLayers.Models.NinePart
+namespace Reclaim.Models.SixPart
 {
 	public class CostFunction : ICostFunction
 	{
@@ -55,55 +58,54 @@ namespace PrefabIdentificationLayers.Models.NinePart
 		{
 			switch (name)
 			{
-			case "topleft":
-			case "topright":
-			case "bottomleft":
-			case "bottomright":
-				return GetCornerHeuristic(part);
+				case "corner":
+					return GetCornerHeuristic(part);
 
 
-			case "top":
-				if (assignment["topleft"].IsAssigned && assignment["topright"].IsAssigned)
-				{
-					Region biggest = GetBiggest(cache, ((Size)assignment["topleft"].AssignedValue).Width, ((Size)assignment["topright"].AssignedValue).Width);
-					if (biggest != null)
-						return biggest.Bitmap.PixelCount() + biggest.Bitmap.Width;
+				case "top":
+					if (assignment["corner"].IsAssigned)
+					{
+						Region biggest = GetBiggest(cache, ((Size)assignment["corner"].AssignedValue).Width);
+						if (biggest != null)
+							return biggest.Bitmap.PixelCount() + biggest.Bitmap.Width;
+					}
+					break;
+
+				case "left":
+					if (assignment["corner"].IsAssigned)
+					{
+						Region biggest = GetBiggest(cache, ((Size)assignment["corner"].AssignedValue).Height);
+						if (biggest != null)
+							return biggest.Bitmap.PixelCount() + biggest.Bitmap.Height;
+					}
+					break;
+
+				case "right":
+					if (assignment["corner"].IsAssigned)
+					{
+						Region biggest = GetBiggest(cache, ((Size)assignment["corner"].AssignedValue).Width);
+						if (biggest != null)
+							return biggest.Bitmap.PixelCount() + biggest.Bitmap.Height;
+					}
+					break;
+
+				case "bottom":
+					if (assignment["corner"].IsAssigned)
+					{
+						Region biggest = GetBiggest(cache, ((Size)assignment["corner"].AssignedValue).Width);
+						if (biggest != null)
+							return biggest.Bitmap.PixelCount() + biggest.Bitmap.Width;
+					}
+					break;
 				}
-				break;
-
-			case "left":
-				if (assignment["topleft"].IsAssigned && assignment["bottomleft"].IsAssigned)
-				{
-					Region biggest = GetBiggest(cache, ((Size)assignment["topleft"].AssignedValue).Height, ((Size)assignment["bottomleft"].AssignedValue).Height);
-					if (biggest != null)
-						return biggest.Bitmap.PixelCount() + biggest.Bitmap.Height;
-				}
-				break;
-
-			case "right":
-				if (assignment["topright"].IsAssigned && assignment["bottomright"].IsAssigned)
-				{
-					Region biggest = GetBiggest(cache, ((Size)assignment["topright"].AssignedValue).Width, ((Size)assignment["bottomright"].AssignedValue).Width);
-					if (biggest != null)
-						return biggest.Bitmap.PixelCount() + biggest.Bitmap.Height;
-				}
-				break;
-
-			case "bottom":
-				if (assignment["bottomleft"].IsAssigned && assignment["bottomright"].IsAssigned)
-				{
-					Region biggest = GetBiggest(cache, ((Size)assignment["bottomleft"].AssignedValue).Width, ((Size)assignment["bottomright"].AssignedValue).Width);
-					if (biggest != null)
-						return biggest.Bitmap.PixelCount() + biggest.Bitmap.Width;
-				}
-				break;
-			}
 
 			return 1;
 		}
 
-		private Region GetBiggest(Dictionary<object, object> cache, int start, int end)
+		private Region GetBiggest(Dictionary<object, object> cache, int start)
 		{
+			int end = start; // Due to removing other corners... 
+
 			List<object> matches = new List<object>();
 			foreach(object key in cache.Keys){
 				if(key is RegionParameters){

@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using Prefab;
 using System.Collections;
+using PrefabIdentificationLayers.Models;
+using PrefabIdentificationLayers;
 
-namespace PrefabIdentificationLayers.Models.NinePart
+namespace Reclaim.Models.NinePart
 {
 	internal class PartGetter : IPartGetter, IConstraintGetter
 	{
-
-		private const int c_maxCornerSize = 6;
-		private const int c_minCornerSize = 1;
-
+		int c_minCornerSize = 1; 
 
 		public static readonly PartGetter Instance = new PartGetter();
 		private PartGetter() {}
@@ -23,28 +22,42 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			List<string> edgetypes = new List<string>() { "repeating" };
 			ArrayList interiortypes = new ArrayList { "horizontal", "vertical", "single" };
 
-
-			RegionParameters minhoriz = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
-			RegionParameters maxhoriz = new RegionParameters(null, c_maxCornerSize, c_maxCornerSize, c_maxCornerSize);
-			RegionParameters minvert = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
-			RegionParameters maxvert = new RegionParameters(null, c_maxCornerSize, c_maxCornerSize, c_maxCornerSize);
-
-
 			int smallestWidth = int.MaxValue;
 			int smallestHeight = int.MaxValue;
+			int largestWidth = -1;
+			int largestHeight = -1; 
 
 			foreach (Bitmap example in positives)
 			{
 				if (example.Width < smallestWidth)
+				{
 					smallestWidth = example.Width;
+				}
+
 				if (example.Height < smallestHeight)
+				{
 					smallestHeight = example.Height;
+				}
+
+				if (example.Width > largestWidth)
+				{
+					largestWidth = example.Width; 
+				}
+
+				if (example.Height > largestHeight)
+				{
+					largestHeight = example.Height; 
+				}
 			}
 
 			smallestHeight -= 2;
 			smallestWidth -= 2;
 
-
+			int maxCornerSize = GetMaxCornerSize(largestHeight, largestWidth); 
+			RegionParameters minhoriz = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
+			RegionParameters maxhoriz = new RegionParameters(null, maxCornerSize, maxCornerSize, maxCornerSize);
+			RegionParameters minvert = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
+			RegionParameters maxvert = new RegionParameters(null, maxCornerSize, maxCornerSize, maxCornerSize);
 
 			maxhoriz.Depth = (int)Math.Min(smallestHeight / 2, maxhoriz.Depth);
 			maxhoriz.Start = (int)Math.Min(smallestWidth / 2, maxhoriz.Start);
@@ -53,13 +66,7 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			maxvert.Start = (int)Math.Min(smallestHeight / 2, maxvert.Start);
 			maxvert.End = (int)Math.Min(smallestHeight / 2, maxvert.End);
 
-
-
-
-			parts.Add("topleft", new Part(GetCornerValues(smallestWidth, smallestHeight)));
-			parts.Add("topright", new Part(GetCornerValues(smallestWidth, smallestHeight)));
-			parts.Add("bottomleft", new Part(GetCornerValues(smallestWidth, smallestHeight)));
-			parts.Add("bottomright", new Part(GetCornerValues(smallestWidth, smallestHeight)));
+			parts.Add("corner", new Part(GetCornerValues(smallestWidth, smallestHeight, maxCornerSize)));
 
 			parts.Add("top", new Part(GetEdgeValues(edgetypes, minhoriz, maxhoriz)));
 			parts.Add("bottom", new Part(GetEdgeValues(edgetypes, minhoriz, maxhoriz)));
@@ -71,9 +78,9 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			return parts;
 		}
 
-		private ArrayList GetCornerValues(int smallestWidth, int smallestHeight)
+		private ArrayList GetCornerValues(int smallestWidth, int smallestHeight, int maxCornerSize)
 		{
-			Size max = new Size(c_maxCornerSize, c_maxCornerSize);
+			Size max = new Size(maxCornerSize, maxCornerSize);
 			Size min = new Size(c_minCornerSize, c_minCornerSize);
 
 			GetMaxSize(max, smallestWidth, smallestHeight);
@@ -83,8 +90,12 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			{
 				for (int width = min.Width; width <= max.Width; width++)
 				{
-					object value = new Size(width, height);
-					values.Add(value);
+					// Restrict all width and height for corner values to be the same. 
+					if (width == height)
+					{
+						object value = new Size(width, height);
+						values.Add(value);
+					}
 				}
 
 			}
@@ -119,6 +130,19 @@ namespace PrefabIdentificationLayers.Models.NinePart
 			return new Size(width, height);
 		}
 
+		// Get the maximum corner size based on the height and width of the rectangle. This assumes that the height and width of corner dimensions are the same
+		private int GetMaxCornerSize(int maxHeight, int maxWidth)
+		{
+			// Find the smaller side because that will determine the maximum corner radius
+			int smallerSide = maxWidth; 
+			if (maxHeight < maxWidth)
+			{
+				smallerSide = maxHeight; 
+			}
+
+			return smallerSide / 4; 
+		}
+
 
 		#endregion
 
@@ -129,71 +153,38 @@ namespace PrefabIdentificationLayers.Models.NinePart
 		{
 			List<Constraint> constraints = new List<Constraint>();
 
+			// Same Edge Depth of top and bottom
 			Constraint topSymmetricToBottom = new Constraint(SameEdgeDepth, parts["top"], parts["bottom"]);
 			constraints.Add(topSymmetricToBottom);
 
+			// Same Edge Depth of left and right
 			Constraint leftSymmetricToRight = new Constraint(SameEdgeDepth, parts["left"], parts["right"]);
 			constraints.Add(leftSymmetricToRight);
 
-			Constraint topLeftAdjacentToTopRegion = new Constraint(RegionStartEqualsWidth, parts["topleft"], parts["top"]);
-			constraints.Add(topLeftAdjacentToTopRegion);
+			// Makes sense -- order of parameters doesn't matter.
+			// Width
+			Constraint cornerAdjacentToTopRegion = new Constraint(RegionStartEqualsWidth, parts["top"], parts["corner"]);
+			constraints.Add(cornerAdjacentToTopRegion);
 
-			Constraint topRightAdjacentToTopRegion = new Constraint(RegionEndEqualsWidth, parts["top"], parts["topright"]);
-			constraints.Add(topRightAdjacentToTopRegion);
+			Constraint cornerAdjacentToBottomRegion = new Constraint(RegionStartEqualsWidth,  parts["bottom"], parts["corner"]);
+			constraints.Add(cornerAdjacentToBottomRegion);
 
-			Constraint bottomLeftAdjacentToBottomRegion = new Constraint(RegionStartEqualsWidth,  parts["bottom"], parts["bottomleft"]);
-			constraints.Add(bottomLeftAdjacentToBottomRegion);
+			// Height
+			Constraint cornerAdjacentToLeftRegion = new Constraint(RegionStartEqualsHeight, parts["left"], parts["corner"]);
+			constraints.Add(cornerAdjacentToLeftRegion);
 
-			Constraint bottomRightAdjacentToBottomRegion = new Constraint(RegionEndEqualsWidth, parts["bottomright"], parts["bottom"]);
-			constraints.Add(bottomRightAdjacentToBottomRegion);
+			Constraint cornerAdjacentToRightRegion = new Constraint(RegionStartEqualsHeight, parts["right"], parts["corner"]);
+			constraints.Add(cornerAdjacentToRightRegion);
 
-			Constraint topLeftAdjacentToLeftRegion = new Constraint(RegionStartEqualsHeight, parts["left"], parts["bottomleft"]);
-			constraints.Add(topLeftAdjacentToLeftRegion);
+			Constraint cornerIsSquare = new Constraint(FeatureIsSquare, parts["corner"], parts["corner"]);
+			constraints.Add(cornerIsSquare);
 
-			Constraint bottomLeftAdjacentToLeftRegion = new Constraint(RegionEndEqualsHeight, parts["bottomleft"], parts["left"]);
-			constraints.Add(bottomLeftAdjacentToLeftRegion);
+			// Esnure the corner height is > than the height of the border region
+			Constraint cornerIsLessThanOrEqualToHeight = new Constraint(DepthIsSmallHeight, parts["top"], parts["corner"]);
+			constraints.Add(cornerIsLessThanOrEqualToHeight);
 
-			Constraint topRightAdjacentToRightRegion = new Constraint(RegionStartEqualsHeight, parts["topright"], parts["right"]);
-			constraints.Add(topRightAdjacentToRightRegion);
-
-			Constraint bottomRightAdjacentToRightRegion = new Constraint(RegionEndEqualsHeight, parts["right"], parts["bottomright"]);
-			constraints.Add(bottomRightAdjacentToRightRegion);
-
-			Constraint topLeftIsSquare = new Constraint(FeatureIsSquare, parts["topleft"], parts["topleft"]);
-			constraints.Add(topLeftIsSquare);
-
-			Constraint topRightIsSquare = new Constraint(FeatureIsSquare, parts["topright"], parts["topright"]);
-			constraints.Add(topRightIsSquare);
-
-			Constraint bottomRightIsSquare = new Constraint(FeatureIsSquare, parts["bottomright"], parts["bottomright"]);
-			constraints.Add(bottomRightIsSquare);
-
-			Constraint bottomLeftIsSquare = new Constraint(FeatureIsSquare, parts["bottomleft"], parts["bottomleft"]);
-			constraints.Add(bottomLeftIsSquare);
-
-			Constraint topLeftTopRightSameSize = new Constraint(PartsAreSameSizeOrZero, parts["topleft"], parts["topright"]);
-			constraints.Add(topLeftTopRightSameSize);
-
-			Constraint topRightBottomRightSameSize = new Constraint(PartsAreSameSizeOrZero, parts["topright"], parts["bottomright"]);
-			constraints.Add(topRightBottomRightSameSize);
-
-			Constraint bottomRightBottomLeftSameSize = new Constraint(PartsAreSameSizeOrZero, parts["bottomright"], parts["bottomleft"]);
-			constraints.Add(bottomRightBottomLeftSameSize);
-
-			Constraint bottomLeftTopLeftSameSize = new Constraint(PartsAreSameSizeOrZero, parts["bottomleft"], parts["topleft"]);
-			constraints.Add(bottomLeftTopLeftSameSize);
-
-			Constraint topIsLessThanOrEqualToHeight = new Constraint(DepthIsSmallHeight, parts["topleft"], parts["top"]);
-			constraints.Add(topIsLessThanOrEqualToHeight);
-
-			Constraint bottomIsLessThanOrEqualToHeight = new Constraint(DepthIsSmallHeight, parts["bottomleft"], parts["bottom"]);
-			constraints.Add(bottomIsLessThanOrEqualToHeight);
-
-			Constraint leftIsLessThanOrEqualToWidth = new Constraint(DepthIsSmallWidth, parts["left"], parts["topleft"]);
-			constraints.Add(leftIsLessThanOrEqualToWidth);
-
-			Constraint rightIsLessThanOrEqualToWidth = new Constraint(DepthIsSmallWidth, parts["right"], parts["topright"]);
-			constraints.Add(rightIsLessThanOrEqualToWidth);
+			Constraint cornerIsLessThanOrEqualToWidth = new Constraint(DepthIsSmallWidth, parts["left"], parts["corner"]);
+			constraints.Add(cornerIsLessThanOrEqualToWidth);
 
 			Constraint topStartEqualsEnd = new Constraint(RegionStartEqualsEnd, parts["top"], parts["top"]);
 			constraints.Add(topStartEqualsEnd);

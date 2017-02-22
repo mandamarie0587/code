@@ -133,6 +133,7 @@ namespace PrefabIdentificationLayers.Models
                 if (!MatchesAnyNegatives(rendition, state.NegativeExamples))
                 {
                     state.BestCost = cost;
+					Console.WriteLine(cost); 
                     state.BestRendition = rendition;
                 }
                 return state.BestRendition;
