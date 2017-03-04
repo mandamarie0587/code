@@ -5,30 +5,13 @@ namespace Reclaim
 {
 	[Serializable]
 	[JsonObject(IsReference=true)]
-	public class Rectangle
+	public class Rectangle: Shape
 	{
-		public Rectangle(string id)
+		public Rectangle(string id): base(id)
 		{
-			this.ID = id;
 			this.BorderRadius = new Radius();
-			this.BackgroundColor = new RGB();
 			this.BorderColor = new RGB(); 
 			this.BorderWidth = 1; 
-
-		}
-
-		[JsonProperty("id")]
-		public string ID
-		{
-			get;
-			set; 
-		}
-
-		[JsonProperty("backgroundColor")]
-		public RGB BackgroundColor
-		{
-			get;
-			set;
 		}
 
 		[JsonProperty("borderColor")]

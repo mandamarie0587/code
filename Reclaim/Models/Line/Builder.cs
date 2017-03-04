@@ -6,7 +6,7 @@ using PrefabIdentificationLayers.Regions;
 using PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers.Models.NinePart; 
 
-namespace Reclaim.Models.SixPart
+namespace Reclaim.Models.Line
 {
 	public class Builder : IPtypeFromAssignment
 	{
@@ -22,17 +22,26 @@ namespace Reclaim.Models.SixPart
 			{
 				Part part = pair.Value;
 				string name = pair.Key;
-				object extracted = Extractor.ExtractPart(name, part.AssignedValue, assignment, positives, negatives, cache);
+				Tuple<string, object> key = new Tuple<string, object>(name, part.AssignedValue);
 
-				if(extracted is Bitmap){
+				object extracted = Extractor.ExtractPart(key, name, part.AssignedValue, assignment, positives, negatives, cache);
+
+				if (extracted is Bitmap)
+				{
 					Bitmap value = (Bitmap)extracted;
 
 					features.Add(name, value);
 				}
 				else if (extracted is Region)
-					regions.Add(name, (Region) extracted);
-				else if (extracted != null) 
-					regions.Add(name, ((BackgroundResults)extracted).Region);
+				{
+					regions.Add(name, (Region)extracted);
+				}
+				else {
+					if (extracted != null)
+					{
+						regions.Add(name, ((BackgroundResults)extracted).Region);
+					}
+				}
 			}
 
 			try{

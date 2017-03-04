@@ -45,11 +45,17 @@
     <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Models\SixPart\PartGetter.cs" />
     <Compile Include="Models\ModelInstances.cs" />
-    <Compile Include="Models\SixPart\NextPartSelect.cs" />
     <Compile Include="Models\BranchAndBound\MRVSelecter.cs" />
     <Compile Include="Models\SixPart\CostFunction.cs" />
     <Compile Include="Models\SixPart\Extractor.cs" />
     <Compile Include="Models\SixPart\Builder.cs" />
+    <Compile Include="Models\Line\PartGetter.cs" />
+    <Compile Include="Models\Line\Builder.cs" />
+    <Compile Include="Models\Line\CostFunction.cs" />
+    <Compile Include="Models\Line\Extractor.cs" />
+    <Compile Include="Models\NextPartSelect.cs" />
+    <Compile Include="Shapes\Line.cs" />
+    <Compile Include="Shapes\Shape.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="rectangle_orange.png">
@@ -65,6 +71,7 @@
     <Folder Include="Models\" />
     <Folder Include="Models\SixPart\" />
     <Folder Include="Models\BranchAndBound\" />
+    <Folder Include="Models\Line\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Prefab\Prefab.csproj">

@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using PrefabModels = PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers.Prototypes;
 using ReclaimModels = Reclaim.Models;
+using Reclaim.Models.Line;
+using Reclaim.Models.SixPart; 
 using Newtonsoft.Json;
+
 
 namespace Reclaim
 {
@@ -56,7 +59,7 @@ namespace Reclaim
 		{
 			if (args.Length > 0)
 			{
-				List<Rectangle> results = new List<Rectangle>();
+				List<Shape> results = new List<Shape>();
 
 				for (int i = 0; i < args.Length; i++)
 				{
@@ -65,15 +68,30 @@ namespace Reclaim
 					{
 						// Create a new Bitmap 
 						Bitmap bitmap = Bitmap.FromFile(args[i]);
-						PrefabModels.BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap);
-						Ptype.Mutable result = Ptype.BuildFromExamples(ptypeArgs);
-						if (result != null)
+						List<string> models = new List<string>();
+						models.Add("sixpart");
+						models.Add("line"); 
+						foreach(string model in models)
 						{
-							string id = GetIDFromFilename(args[i]);
-							if (id.Length > 0)
+							//System.Console.WriteLine("rectangle model");
+							var watch = System.Diagnostics.Stopwatch.StartNew(); 
+
+							PrefabModels.BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap, ReclaimModels.ModelInstances.Get(model));
+							Ptype.Mutable result = Ptype.BuildFromExamples(ptypeArgs);
+
+							if (result != null)
 							{
-								Rectangle newRectangle = ConvertPrototypeToJson(result, id);
-								results.Add(newRectangle);
+								string id = GetIDFromFilename(args[i]);
+								if (id.Length > 0)
+								{
+									Shape newShape = ConvertPrototypeToJson(model, result, id);
+									results.Add(newShape);
+									watch.Stop();
+									var elapsedS = (watch.ElapsedMilliseconds / 1000);
+								//	Console.WriteLine("time elapsed: " + elapsedS.ToString());
+									break;
+								}
+
 							}
 
 						}
@@ -110,7 +128,7 @@ namespace Reclaim
 		}
 
 		// construct prototype args from thew bitmap image
-		public static PrefabModels.BuildPrototypeArgs GetPrototypeArgsForImage(Bitmap bitmap)
+		public static PrefabModels.BuildPrototypeArgs GetPrototypeArgsForImage(Bitmap bitmap, PrefabModels.Model model)
 		{
 			string id = Guid.NewGuid().ToString();
 
@@ -119,16 +137,44 @@ namespace Reclaim
 			List<Bitmap> negatives = new List<Bitmap>();
 			positives.Add(bitmap);
 			PrefabModels.Examples examples = new PrefabModels.Examples(positives, negatives); 
-			PrefabModels.BuildPrototypeArgs args = new PrefabModels.BuildPrototypeArgs(examples, ReclaimModels.ModelInstances.SixPart, id);
+			PrefabModels.BuildPrototypeArgs args = new PrefabModels.BuildPrototypeArgs(examples, model, id);
 
 			return args;
 		}
 
-		public static Rectangle ConvertPrototypeToJson(Ptype.Mutable prototype, string id)
+		public static Shape ConvertPrototypeToJson(string model, Ptype.Mutable prototype, string id)
 		{
-			// Convert features topleft,topright,bottomleft,bottomright to their corresponding corner radius values
-			Rectangle myRectangle = new Rectangle(id);
+			if (model == "sixpart")
+			{
+				return ConvertRectangleToJson(prototype, new Rectangle(id));
+			}
+			else if (model == "line")
+			{
+				return ConvertLineToJson(prototype, new Line(id));
+			}
 
+			return null; 
+		}
+
+		public static Line ConvertLineToJson(Ptype.Mutable prototype, Line myLine)
+		{
+			// Get the thickness of the line
+			PrefabIdentificationLayers.Regions.Region interior = null;
+			RGB backgroundColor = new RGB();
+			int thickness = 1; 
+			if (prototype.Regions.TryGetValue("interior", out interior))
+			{
+				backgroundColor = ReclaimBitmap.GetColor(interior.Bitmap);
+				thickness = interior.Bitmap.Height;
+			}
+			myLine.FillColor = backgroundColor;
+			myLine.Thickness = thickness; 
+
+			return myLine; 
+		}
+
+		public static Rectangle ConvertRectangleToJson(Ptype.Mutable prototype, Rectangle myRectangle)
+		{
 			// Corner radius
 			Bitmap corner = null;
 			if (prototype.Features.TryGetValue("corner", out corner))
@@ -140,7 +186,7 @@ namespace Reclaim
 			//  Get border width, border color from the extracted side regions
 			// Height
 			PrefabIdentificationLayers.Regions.Region bottom = null;
-			int bottomHeight = 1;
+			int bottomHeight = 0;
 			List<RGB> borderColors = new List<RGB>();
 			if (prototype.Regions.TryGetValue("bottom", out bottom))
 			{
@@ -149,7 +195,7 @@ namespace Reclaim
 			}
 
 			PrefabIdentificationLayers.Regions.Region top = null;
-			int topHeight = 1;
+			int topHeight = 0;
 			if (prototype.Regions.TryGetValue("top", out top))
 			{
 				topHeight = top.Bitmap.Height;
@@ -158,7 +204,7 @@ namespace Reclaim
 
 			// Width
 			PrefabIdentificationLayers.Regions.Region left = null;
-			int leftWidth = 1;
+			int leftWidth = 0;
 			if (prototype.Regions.TryGetValue("left", out left))
 			{
 				leftWidth = left.Bitmap.Width;
@@ -166,7 +212,7 @@ namespace Reclaim
 			}
 
 			PrefabIdentificationLayers.Regions.Region right = null;
-			int rightWidth = 1;
+			int rightWidth = 0;
 			if (prototype.Regions.TryGetValue("right", out right))
 			{
 				rightWidth = right.Bitmap.Width;
@@ -175,18 +221,26 @@ namespace Reclaim
 
 			// Average all border widths because they can't be set separately anyway
 			myRectangle.BorderWidth = (topHeight + bottomHeight + leftWidth + rightWidth) / 4;
-			myRectangle.BorderColor = ReclaimBitmap.GetAverageColor(borderColors);
+
+			if (borderColors.Count > 0)
+			{
+				myRectangle.BorderColor = ReclaimBitmap.GetAverageColor(borderColors);
+			}
+			else
+			{
+				myRectangle.BorderColor = new RGB();
+			}
 
 			// Get the background color
 			PrefabIdentificationLayers.Regions.Region interior = null;
-			RGB backgroundColor = new RGB();
+			RGB fillColor = new RGB();
 			if (prototype.Regions.TryGetValue("interior", out interior))
 			{
-				backgroundColor = ReclaimBitmap.GetColor(interior.Bitmap);
+				fillColor = ReclaimBitmap.GetColor(interior.Bitmap);
 			}
-			myRectangle.BackgroundColor = backgroundColor;
+			myRectangle.FillColor = fillColor;
 
-			return myRectangle;
+			return myRectangle; 
 		}
 
 		private static void FailedToLoad(string filename, Exception e)

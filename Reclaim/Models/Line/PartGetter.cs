@@ -5,14 +5,15 @@ using System.Collections;
 using PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers;
 
-namespace Reclaim.Models.SixPart
+namespace Reclaim.Models.Line
 {
 	internal class PartGetter : IPartGetter, IConstraintGetter
 	{
-		int c_minCornerSize = 1;
+		int c_minCornerSize = 0;
+		int c_minSideWidth = 0; 
 
 		public static readonly PartGetter Instance = new PartGetter();
-		private PartGetter() { }
+		private PartGetter() {}
 
 		#region Parts
 		public Dictionary<string, Part> GetParts(IEnumerable<Bitmap> positives, IEnumerable<Bitmap> negatives)
@@ -25,7 +26,7 @@ namespace Reclaim.Models.SixPart
 			int smallestWidth = int.MaxValue;
 			int smallestHeight = int.MaxValue;
 			int largestWidth = -1;
-			int largestHeight = -1;
+			int largestHeight = -1; 
 
 			foreach (Bitmap example in positives)
 			{
@@ -41,29 +42,29 @@ namespace Reclaim.Models.SixPart
 
 				if (example.Width > largestWidth)
 				{
-					largestWidth = example.Width;
+					largestWidth = example.Width; 
 				}
 
 				if (example.Height > largestHeight)
 				{
-					largestHeight = example.Height;
+					largestHeight = example.Height; 
 				}
 			}
 
 			smallestHeight -= 2;
 			smallestWidth -= 2;
 
-			int maxCornerSize = GetMaxCornerSize(largestHeight, largestWidth);
-			//int maxCornerSize = 6;
-			RegionParameters minhoriz = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
+			int maxCornerSize = GetMaxCornerSize(largestHeight, largestWidth); 
+
+			RegionParameters minhoriz = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 0);
 			RegionParameters maxhoriz = new RegionParameters(null, maxCornerSize, maxCornerSize, maxCornerSize);
-			RegionParameters minvert = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 1);
+			RegionParameters minvert = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 0);
 			RegionParameters maxvert = new RegionParameters(null, maxCornerSize, maxCornerSize, maxCornerSize);
 
-			maxhoriz.Depth = (int)Math.Min(smallestHeight / 2, maxhoriz.Depth);
+			maxhoriz.Depth = 3;
 			maxhoriz.Start = (int)Math.Min(smallestWidth / 2, maxhoriz.Start);
 			maxhoriz.End = (int)Math.Min(smallestWidth / 2, maxhoriz.End);
-			maxvert.Depth = (int)Math.Min(smallestWidth / 2, maxvert.Depth);
+			maxvert.Depth = 3;
 			maxvert.Start = (int)Math.Min(smallestHeight / 2, maxvert.Start);
 			maxvert.End = (int)Math.Min(smallestHeight / 2, maxvert.End);
 
@@ -76,22 +77,7 @@ namespace Reclaim.Models.SixPart
 
 			parts.Add("interior", new Part(interiortypes));
 
-			//parts.Add("topignore", new Part(GetIgnoreValues()));
-			//parts.Add("bottomignore", new Part(GetIgnoreValues())); 
-			//parts.Add("leftignore", new Part(GetIgnoreValues()));
-			//parts.Add("rightignore", new Part(GetIgnoreValues()));
-
-
 			return parts;
-		}
-
-		private ArrayList GetIgnoreValues()
-		{
-			ArrayList ignoreValues = new ArrayList();
-			ignoreValues.Add(0);
-			ignoreValues.Add(1);
-			//ignoreValues.Add(2);
-			return ignoreValues;
 		}
 
 		private ArrayList GetCornerValues(int smallestWidth, int smallestHeight, int maxCornerSize)
@@ -107,11 +93,11 @@ namespace Reclaim.Models.SixPart
 				for (int width = min.Width; width <= max.Width; width++)
 				{
 					// Restrict all width and height for corner values to be the same. 
-				//	if (width == height)
-				//	{
+					if (width == height)
+					{
 						object value = new Size(width, height);
 						values.Add(value);
-				//	}
+					}
 				}
 
 			}
@@ -129,11 +115,8 @@ namespace Reclaim.Models.SixPart
 					{
 						for (int right = min.End; right <= max.End; right++)
 						{
-							if (left == right) // Assume the rectangle is symmetrical so left and right can be the same
-							{
-								object value = new RegionParameters(type, left, right, depth);
-								values.Add(value);
-							}
+							object value = new RegionParameters(type, left, right, depth);
+							values.Add(value);
 						}
 					}
 				}
@@ -153,13 +136,13 @@ namespace Reclaim.Models.SixPart
 		private int GetMaxCornerSize(int maxHeight, int maxWidth)
 		{
 			// Find the smaller side because that will determine the maximum corner radius
-			int smallerSide = maxWidth;
+			int smallerSide = maxWidth; 
 			if (maxHeight < maxWidth)
 			{
-				smallerSide = maxHeight;
+				smallerSide = maxHeight; 
 			}
 
-			return smallerSide /2;
+			return smallerSide / 4; 
 		}
 
 
@@ -184,7 +167,7 @@ namespace Reclaim.Models.SixPart
 			Constraint cornerAdjacentToTopRegion = new Constraint(RegionStartEqualsWidth, parts["top"], parts["corner"]);
 			constraints.Add(cornerAdjacentToTopRegion);
 
-			Constraint cornerAdjacentToBottomRegion = new Constraint(RegionStartEqualsWidth, parts["bottom"], parts["corner"]);
+			Constraint cornerAdjacentToBottomRegion = new Constraint(RegionStartEqualsWidth,  parts["bottom"], parts["corner"]);
 			constraints.Add(cornerAdjacentToBottomRegion);
 
 			// Height
@@ -365,13 +348,6 @@ namespace Reclaim.Models.SixPart
 		{
 			Size size = (Size)v1;
 			return size.Width == size.Height;
-		}
-
-		public static bool IgnoreValueEqual(object v1, object v2)
-		{
-			Int32 value1 = (Int32)v1;
-			Int32 value2 = (Int32)v2;
-			return value1.Equals(value2);
 		}
 
 		private static bool ContentLeftAligned(object v1, object v2)

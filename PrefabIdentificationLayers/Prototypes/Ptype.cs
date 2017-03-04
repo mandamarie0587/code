@@ -113,8 +113,6 @@ namespace PrefabIdentificationLayers.Prototypes
 			return result;
 		}
 
-
-
 		private Ptype(Dictionary<string, Feature> features, Dictionary<string, Region> regions, Model model) : 
 		this(Guid.NewGuid().ToString(), features, regions, model){
 
@@ -234,7 +232,14 @@ namespace PrefabIdentificationLayers.Prototypes
 				Features = new Dictionary<String, Bitmap>();
 
 				Regions = new Dictionary<String, Region>();
+
 			}
+
+			public double BestCost
+			{
+				get; set;
+			}
+
 			public Mutable(Dictionary<string, Bitmap> features, Dictionary<string, Region> regions)
 			{
 				List<Bitmap> fcpy = new List<Bitmap>();

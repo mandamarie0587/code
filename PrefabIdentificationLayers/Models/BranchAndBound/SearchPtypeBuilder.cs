@@ -105,8 +105,12 @@ namespace PrefabIdentificationLayers.Models
             //Run an initial constraint propagation to reduce the branching factor
             AC_3(false, constraints);
 
-
-            return Search(state);
+			Ptype.Mutable prototype = Search(state);
+			if (prototype != null)
+			{
+				prototype.BestCost = state.BestCost;
+			}
+			return prototype; 
         }
 
         /// <summary>
@@ -133,7 +137,7 @@ namespace PrefabIdentificationLayers.Models
                 if (!MatchesAnyNegatives(rendition, state.NegativeExamples))
                 {
                     state.BestCost = cost;
-					Console.WriteLine(cost); 
+					//Console.WriteLine(cost); 
                     state.BestRendition = rendition;
                 }
                 return state.BestRendition;
@@ -219,6 +223,14 @@ namespace PrefabIdentificationLayers.Models
                 if (!p.IsAssigned)
                     return false;
             }
+
+			/// Debugging
+			string assigned = ""; 
+			foreach (Part p in parts)
+			{
+				assigned = assigned + "," + p.AssignedValue.ToString(); 
+			}
+			System.Console.WriteLine(assigned); 
 
             return true;
         }

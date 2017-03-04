@@ -24,7 +24,7 @@ namespace Reclaim.Models.SixPart
 		/// <param name="cache">The cache foreach storing parameterizations to check foreach subsequent calls.</param>
 		/// <returns>The parameterized part (either a feature or region)</returns>
 		public static object ExtractPart(string name, object value,
-			Dictionary <string, Part> assignment, IEnumerable<Bitmap> positives, IEnumerable<Bitmap> negatives, Dictionary<object,object> cache)
+			Dictionary<string, Part> assignment, IEnumerable<Bitmap> positives, IEnumerable<Bitmap> negatives, Dictionary<object, object> cache)
 		{
 
 
@@ -33,63 +33,133 @@ namespace Reclaim.Models.SixPart
 			Size size = null;
 			RegionParameters rps = null;
 			BackgroundValue bv = null;
-			if(value is Size)
+			if (value is Size)
 				size = (Size)value;
-			else if(value is RegionParameters)
-				rps  = (RegionParameters)value;
-			else if (value is  string)
+			else if (value is RegionParameters)
+				rps = (RegionParameters)value;
+			else if (value is string)
 			{
-				bv = GetBackgroundValue((String) value, assignment);
+				bv = GetBackgroundValue((String)value, assignment);
 				value = bv;
 			}
 
-			Tuple <string, object> key = new Tuple<string, object>(name, value);
+			Tuple<string, object> key = new Tuple<string, object>(name, value);
 
 			if (!cache.ContainsKey(key))
 			{
+				//object ignoreRows = GetIgnoreRows(name, assignment);
+				int ignoreRows = 0; 
 				switch (name)
 				{
-				case "corner":
-					extracted = CropFromManyRelativeTopLeft(0, 0, size.Width, size.Height, positives);
-					break;
+					case "corner":
+					//	Tuple<int, int> cropCorners = (Tuple<int, int>)ignoreRows;
+						extracted = CropFromManyRelativeTopLeft(0,0, size.Width, size.Height, positives);
+						break;
 
-				case "top":
-					extracted = GetHorizontal(true, rps.Start, rps.End, rps.Depth, positives);
-					break;
+					case "top":
+						extracted = GetHorizontal(true, rps.Start, rps.End, rps.Depth, positives, (int)ignoreRows);
+						break;
 
-				case "bottom":
-					extracted = GetHorizontal(false, rps.Start, rps.End, rps.Depth, positives);
-					break;
+					case "bottom":
+						extracted = GetHorizontal(false, rps.Start, rps.End, rps.Depth, positives, (int)ignoreRows);
+						break;
 
-				case "left":
-					extracted = GetVertical(true, rps.Start, rps.End, rps.Depth, positives);
-					break;
+					case "left":
+						extracted = GetVertical(true, rps.Start, rps.End, rps.Depth, positives, (int)ignoreRows);
+						break;
 
-				case "right":
-					extracted = GetVertical(false, rps.Start, rps.End, rps.Depth, positives);
-					break;
+					case "right":
+						extracted = GetVertical(false, rps.Start, rps.End, rps.Depth, positives, (int)ignoreRows);
+						break;
 
-				case "interior":
-					extracted = GetInterior(bv, positives);
-					break;
+					case "interior":
+						extracted = GetInterior(bv, positives, (int)ignoreRows);
+						break;
 				}
 
 				//Features that have all one value are likely to be background. So we disallow it.
 				//Features that are all transparent can't be found (obviously). So we disallow it.
 				if (extracted != null && extracted is Bitmap && (Bitmap.AllOneValue((Bitmap)extracted) || Bitmap.AllTransparent((Bitmap)extracted)))
 				{
-				extracted = null;
+					extracted = null;
 				}
 
 				cache.Add(key, extracted);
-			}else
+			}
+			else
 				extracted = cache[key];
 
 			return extracted;
 
 		}
 
-		private static object GetInterior(BackgroundValue bp, IEnumerable<Bitmap> positives)
+		private static object GetIgnoreRows(string name, Dictionary<string, Part> assignment)
+		{
+			if (name == "corner")
+			{
+				int top = 0;
+				int left = 0; 
+				if (assignment["topignore"].IsAssigned)
+				{
+					top = (int)assignment["topignore"].AssignedValue; 
+				}
+
+				if (assignment["leftignore"].IsAssigned)
+				{
+					left = (int)assignment["leftignore"].AssignedValue; 
+				}
+
+				return Tuple.Create(top, left); 
+			}
+			else if (name == "top")
+			{
+				if (assignment["topignore"].IsAssigned)
+				{
+					return assignment["topignore"].AssignedValue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if (name == "bottom")
+			{
+				if (assignment["bottomignore"].IsAssigned)
+				{
+					return assignment["bottomignore"].AssignedValue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if (name == "left")
+			{
+				if (assignment["leftignore"].IsAssigned)
+				{
+					return assignment["leftignore"].AssignedValue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if (name == "right")
+			{
+				if (assignment["rightignore"].IsAssigned)
+				{
+					return assignment["rightignore"].AssignedValue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			return 0;
+		}
+
+		private static object GetInterior(BackgroundValue bp, IEnumerable<Bitmap> positives, int ignoreRows)
 		{
 
 
@@ -97,17 +167,17 @@ namespace Reclaim.Models.SixPart
 			Bitmap pattern = null;
 			switch (bp.Type)
 			{
-			case "single":
-				pattern = MostFrequentPixel(bp, positives);
-				break;
+				case "single":
+					pattern = MostFrequentPixel(bp, positives);
+					break;
 
-			case "horizontal":
-				pattern = MostFrequentColumn(bp, positives);
-				break;
+				case "horizontal":
+					pattern = MostFrequentColumn(bp, positives);
+					break;
 
-			case "vertical":
-				pattern = MostFrequentRow(bp, positives);
-				break;
+				case "vertical":
+					pattern = MostFrequentRow(bp, positives);
+					break;
 
 			}
 
@@ -119,18 +189,18 @@ namespace Reclaim.Models.SixPart
 			int missed = 0;
 			switch (bp.Type)
 			{
-			case "single":
-			case "horizontal":
-				matcher = "horizontal";
-				foreach (Bitmap bmp in positives)
-					missed += HorizontalPatternMatcher.Missed(pattern, bmp, bp);
-				break;
+				case "single":
+				case "horizontal":
+					matcher = "horizontal";
+					foreach (Bitmap bmp in positives)
+						missed += HorizontalPatternMatcher.Missed(pattern, bmp, bp);
+					break;
 
-			case "vertical":
-				matcher = "vertical";
-				foreach (Bitmap bmp in positives)
-					missed += VerticalPatternMatcher.Missed(pattern, bmp, bp);
-				break;
+				case "vertical":
+					matcher = "vertical";
+					foreach (Bitmap bmp in positives)
+						missed += VerticalPatternMatcher.Missed(pattern, bmp, bp);
+					break;
 			}
 
 			BackgroundResults results = new BackgroundResults();
@@ -150,7 +220,7 @@ namespace Reclaim.Models.SixPart
 				Bitmap currCol = null;
 				for (int column = bv.TopLeft.Width; column < bmp.Width - bv.TopRight.Width; column++)
 				{
-					currCol = Bitmap.Crop(bmp, column, bv.Top,  1, bmp.Height - bv.Bottom - bv.Top);
+					currCol = Bitmap.Crop(bmp, column, bv.Top, 1, bmp.Height - bv.Bottom - bv.Top);
 
 					if (!freqs.ContainsKey(currCol))
 						freqs.Add(currCol, 1);
@@ -161,9 +231,10 @@ namespace Reclaim.Models.SixPart
 
 			int max = int.MinValue;
 			Bitmap key = null;
-			foreach(KeyValuePair<Bitmap, int> pair in freqs)
+			foreach (KeyValuePair<Bitmap, int> pair in freqs)
 			{
-				if(pair.Value > max){
+				if (pair.Value > max)
+				{
 					max = pair.Value;
 					key = pair.Key;
 				}
@@ -175,7 +246,7 @@ namespace Reclaim.Models.SixPart
 
 		private static bool AllSameHeight(IEnumerable<Bitmap> positives)
 		{
-			int height = positives.First ().Height;
+			int height = positives.First().Height;
 			foreach (Bitmap bmp in positives)
 				if (bmp.Height != height)
 					return false;
@@ -204,21 +275,22 @@ namespace Reclaim.Models.SixPart
 				Bitmap currRow;
 				for (int row = bv.TopLeft.Height; row < bmp.Height - bv.BottomLeft.Height; row++)
 				{
-					currRow = Bitmap.Crop(bmp, bv.Left, row,  bmp.Width - bv.Left - bv.Right, 1);
+					currRow = Bitmap.Crop(bmp, bv.Left, row, bmp.Width - bv.Left - bv.Right, 1);
 
 					if (!freqs.ContainsKey(currRow))
 						freqs.Add(currRow, 1);
 					else
-						freqs[currRow] =  freqs[currRow] + 1;
+						freqs[currRow] = freqs[currRow] + 1;
 				}
 			}
 
 			int max = int.MaxValue;
 			Bitmap mostFrequent = null;
 
-			foreach(KeyValuePair<Bitmap, int> pair in freqs){
+			foreach (KeyValuePair<Bitmap, int> pair in freqs)
+			{
 
-				if(max < pair.Value)
+				if (max < pair.Value)
 				{
 					mostFrequent = pair.Key;
 					max = pair.Value;
@@ -230,7 +302,7 @@ namespace Reclaim.Models.SixPart
 
 		private static Bitmap MostFrequentPixel(BackgroundValue bp, IEnumerable<Bitmap> positives)
 		{
-			Dictionary<int, int> frequencies = new Dictionary<int,int>();
+			Dictionary<int, int> frequencies = new Dictionary<int, int>();
 
 			foreach (Bitmap pos in positives)
 			{
@@ -247,9 +319,10 @@ namespace Reclaim.Models.SixPart
 			int max = int.MinValue;
 			int mostFrequent = 0;
 
-			foreach(KeyValuePair<int, int> pair in frequencies){
+			foreach (KeyValuePair<int, int> pair in frequencies)
+			{
 
-				if(max < pair.Value)
+				if (max < pair.Value)
 				{
 					mostFrequent = pair.Key;
 					max = pair.Value;
@@ -260,14 +333,14 @@ namespace Reclaim.Models.SixPart
 			return Bitmap.FromPixels(1, 1, new int[] { mostFrequent });
 		}
 
-		private static void GetPixelFrequencies(Dictionary<int,int> frequencies, IBoundingBox bb, Bitmap bmp)
+		private static void GetPixelFrequencies(Dictionary<int, int> frequencies, IBoundingBox bb, Bitmap bmp)
 		{
 
 			for (int row = bb.Top; row < bb.Top + bb.Height; row++)
 			{
 				for (int col = bb.Left; col < bb.Left + bb.Width; col++)
 				{
-								int value = bmp[row, col];
+					int value = bmp[row, col];
 					if (frequencies.ContainsKey(value))
 						frequencies[value] = frequencies[value] + 1;
 					else
@@ -278,14 +351,14 @@ namespace Reclaim.Models.SixPart
 
 		}
 
-		private static Region GetHorizontal(bool top, int left, int right, int height, IEnumerable<Bitmap> positives)
+		private static Region GetHorizontal(bool top, int left, int right, int height, IEnumerable<Bitmap> positives, int ignoreRows)
 		{
 			Bitmap prev = null;
 			foreach (Bitmap example in positives)
 			{
-				int toploc = 0;
+				int toploc = ignoreRows;
 				if (!top)
-					toploc = example.Height - height;
+					toploc = example.Height - height - ignoreRows;
 
 				Bitmap pattern = HorizontalPatternMatcher.ShortestPattern(example, toploc, left, example.Width - right - 1, height);
 				if (prev != null && !prev.Equals(pattern))
@@ -297,14 +370,14 @@ namespace Reclaim.Models.SixPart
 			return new Region("horizontal", prev);
 		}
 
-		private static Region GetVertical(bool left, int top, int bottom, int width, IEnumerable<Bitmap> positives)
+		private static Region GetVertical(bool left, int top, int bottom, int width, IEnumerable<Bitmap> positives, int ignoreRows)
 		{
 			Bitmap prev = null;
 			foreach (Bitmap example in positives)
 			{
-				int leftloc = 0;
+				int leftloc = ignoreRows;
 				if (!left)
-					leftloc = example.Width - width;
+					leftloc = example.Width - width - ignoreRows;
 
 				Bitmap pattern = VerticalPatternMatcher.ShortestPattern(example, leftloc, top, example.Height - bottom - 1, width);
 				if (prev != null && !prev.Equals(pattern))
@@ -316,23 +389,24 @@ namespace Reclaim.Models.SixPart
 			return new Region("vertical", prev);
 		}
 
-		private static BackgroundValue GetBackgroundValue(String value, Dictionary <string, Part> assignment)
+		private static BackgroundValue GetBackgroundValue(String value, Dictionary<string, Part> assignment)
 		{
 			BackgroundValue bv = new BackgroundValue();
 			bv.Type = value;
-						bv.TopLeft = (Size)assignment["corner"].AssignedValue;
-						bv.TopRight = (Size)assignment["corner"].AssignedValue;
-						bv.BottomLeft = (Size)assignment["corner"].AssignedValue;
-						bv.BottomRight = (Size)assignment["corner"].AssignedValue;
-						bv.Top = ((RegionParameters)assignment["top"].AssignedValue).Depth;
-						bv.Left = ((RegionParameters)assignment["left"].AssignedValue).Depth;
-						bv.Bottom = ((RegionParameters)assignment["bottom"].AssignedValue).Depth;
-						bv.Right = ((RegionParameters)assignment["right"].AssignedValue).Depth;
+			bv.TopLeft = (Size)assignment["corner"].AssignedValue;
+			bv.TopRight = (Size)assignment["corner"].AssignedValue;
+			bv.BottomLeft = (Size)assignment["corner"].AssignedValue;
+			bv.BottomRight = (Size)assignment["corner"].AssignedValue;
+			bv.Top = ((RegionParameters)assignment["top"].AssignedValue).Depth;
+			bv.Left = ((RegionParameters)assignment["left"].AssignedValue).Depth;
+			bv.Bottom = ((RegionParameters)assignment["top"].AssignedValue).Depth;
+			bv.Right = ((RegionParameters)assignment["left"].AssignedValue).Depth;
 
 			return bv;
 		}
 
-		public static object CropFromManyRelativeTopLeft(int top, int left, int width, int height, IEnumerable<Bitmap> examples) {
+		public static object CropFromManyRelativeTopLeft(int top, int left, int width, int height, IEnumerable<Bitmap> examples)
+		{
 			List<Bitmap> cropped = new List<Bitmap>();
 
 			foreach (Bitmap example in examples)
@@ -344,7 +418,8 @@ namespace Reclaim.Models.SixPart
 			return Utils.CombineBitmapsAndMakeDifferencesTransparent(cropped);
 		}
 
-		public static object CropFromManyRelativeBottomLeft(int frombottom, int left, int width, int height, IEnumerable<Bitmap> examples) {
+		public static object CropFromManyRelativeBottomLeft(int frombottom, int left, int width, int height, IEnumerable<Bitmap> examples)
+		{
 			List<Bitmap> cropped = new List<Bitmap>();
 			foreach (Bitmap example in examples)
 			{
@@ -354,7 +429,8 @@ namespace Reclaim.Models.SixPart
 			return Utils.CombineBitmapsAndMakeDifferencesTransparent(cropped);
 		}
 
-		public static object CropFromManyRelativeTopRight(int top, int fromright, int width, int height, IEnumerable<Bitmap> examples) {
+		public static object CropFromManyRelativeTopRight(int top, int fromright, int width, int height, IEnumerable<Bitmap> examples)
+		{
 
 			List<Bitmap> cropped = new List<Bitmap>();
 			foreach (Bitmap example in examples)
@@ -362,10 +438,11 @@ namespace Reclaim.Models.SixPart
 				cropped.Add(Bitmap.Crop(example, example.Width - fromright, top, width, height));
 			}
 
-						return Utils.CombineBitmapsAndMakeDifferencesTransparent(cropped);
+			return Utils.CombineBitmapsAndMakeDifferencesTransparent(cropped);
 		}
 
-		public static object CropFromManyRelativeBottomRight(int frombottom, int fromright, int width, int height, IEnumerable<Bitmap> examples) {
+		public static object CropFromManyRelativeBottomRight(int frombottom, int fromright, int width, int height, IEnumerable<Bitmap> examples)
+		{
 			List<Bitmap> cropped = new List<Bitmap>();
 			foreach (Bitmap example in examples)
 			{
