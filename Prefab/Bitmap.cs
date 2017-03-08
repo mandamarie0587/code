@@ -100,12 +100,6 @@ namespace Prefab
 			Pixels = pixels;
 		}
 
-
-
-
-
-
-
 		/// <summary>
 		/// Cosntructs a bitmap with the given parameters.
 		/// A new array of pixels is created.

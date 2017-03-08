@@ -7,10 +7,10 @@ namespace Reclaim
 	[JsonObject(IsReference=true)]
 	public class Rectangle: Shape
 	{
-		public Rectangle(string id): base(id)
+		public Rectangle(string id): base(id, "rectangle")
 		{
 			this.BorderRadius = new Radius();
-			this.BorderColor = new RGB(); 
+			this.BorderColor = new RGB();
 			this.BorderWidth = 1; 
 		}
 

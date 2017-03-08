@@ -7,10 +7,18 @@ namespace Reclaim
 	[JsonObject(IsReference = true)]
 	public class Shape
 	{
-		public Shape(string id)
+		public Shape(string id, string shape_type)
 		{
 			this.ID = id;
 			this.FillColor = new RGB();
+			this.ShapeType = shape_type;
+		}
+
+		[JsonProperty("shapeType")]
+		public string ShapeType
+		{
+			get;
+			set; 
 		}
 
 		[JsonProperty("id")]

@@ -52,8 +52,12 @@ namespace Reclaim.Models.SixPart
 				switch (name)
 				{
 					case "corner":
-					//	Tuple<int, int> cropCorners = (Tuple<int, int>)ignoreRows;
-						extracted = CropFromManyRelativeTopLeft(0,0, size.Width, size.Height, positives);
+						//	Tuple<int, int> cropCorners = (Tuple<int, int>)ignoreRows;
+						//extracted = null;
+						//if (size.Width > 0 && size.Height > 0)
+						//{
+						extracted = CropFromManyRelativeTopLeft(0, 0, size.Width, size.Height, positives);
+						//}
 						break;
 
 					case "top":

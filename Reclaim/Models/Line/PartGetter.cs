@@ -51,9 +51,6 @@ namespace Reclaim.Models.Line
 				}
 			}
 
-			smallestHeight -= 2;
-			smallestWidth -= 2;
-
 			int maxCornerSize = GetMaxCornerSize(largestHeight, largestWidth); 
 
 			RegionParameters minhoriz = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 0);
@@ -61,10 +58,10 @@ namespace Reclaim.Models.Line
 			RegionParameters minvert = new RegionParameters(null, c_minCornerSize, c_minCornerSize, 0);
 			RegionParameters maxvert = new RegionParameters(null, maxCornerSize, maxCornerSize, maxCornerSize);
 
-			maxhoriz.Depth = 3;
+			maxhoriz.Depth = largestHeight;
 			maxhoriz.Start = (int)Math.Min(smallestWidth / 2, maxhoriz.Start);
 			maxhoriz.End = (int)Math.Min(smallestWidth / 2, maxhoriz.End);
-			maxvert.Depth = 3;
+			maxvert.Depth = largestWidth;
 			maxvert.Start = (int)Math.Min(smallestHeight / 2, maxvert.Start);
 			maxvert.End = (int)Math.Min(smallestHeight / 2, maxvert.End);
 
@@ -107,18 +104,26 @@ namespace Reclaim.Models.Line
 		private ArrayList GetEdgeValues(List<string> types, RegionParameters min, RegionParameters max)
 		{
 			ArrayList values = new ArrayList();
+
 			foreach (string type in types)
 			{
-				for (int depth = min.Depth; depth <= max.Depth; depth++)
+				if (max.Start == 0 && max.End == 0)
 				{
-					for (int left = min.Start; left <= max.Start; left++)
-					{
-						for (int right = min.End; right <= max.End; right++)
+					values.Add(new RegionParameters(type, 0, 0, max.Depth));
+				}
+				else
+				{
+					for (int depth = min.Depth; depth <= max.Depth; depth++)
 						{
-							object value = new RegionParameters(type, left, right, depth);
-							values.Add(value);
+							for (int left = min.Start; left <= max.Start; left++)
+							{
+								for (int right = min.End; right <= max.End; right++)
+								{
+									object value = new RegionParameters(type, left, right, depth);
+									values.Add(value);
+								}
+							}
 						}
-					}
 				}
 			}
 

@@ -7,7 +7,7 @@ namespace Reclaim
 	[JsonObject(IsReference=true)]
 	public class Line: Shape
 	{
-		public Line(string id) : base(id)
+		public Line(string id) : base(id, "line")
 		{
 			this.X1 = 0;
 			this.Y1 = 0;

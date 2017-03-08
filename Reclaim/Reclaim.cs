@@ -70,10 +70,9 @@ namespace Reclaim
 						Bitmap bitmap = Bitmap.FromFile(args[i]);
 						List<string> models = new List<string>();
 						models.Add("sixpart");
-						models.Add("line"); 
+						//models.Add("line"); 
 						foreach(string model in models)
 						{
-							//System.Console.WriteLine("rectangle model");
 							var watch = System.Diagnostics.Stopwatch.StartNew(); 
 
 							PrefabModels.BuildPrototypeArgs ptypeArgs = GetPrototypeArgsForImage(bitmap, ReclaimModels.ModelInstances.Get(model));
