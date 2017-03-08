@@ -27,8 +27,17 @@ namespace Reclaim.Models
 				LineModel.Builder.Instance), //how to build a ptype from full assignment
 			PrefabModel.Finder.Instance); //how to find ptype occurrences
 
+		public static readonly Model NinePart = new Model("ninepart",
+			new SearchPtypeBuilder("ninepart",
+		        PrefabModel.CostFunction.Instance,
+		        PrefabModel.PartGetter.Instance, //parts
+		        PrefabModel.PartGetter.Instance, //constraints
+				NextPartSelecter.Instance, //how to select parts in search
+		         PrefabModel.Builder.Instance), //how to build a ptype from full assignment
+			PrefabModel.Finder.Instance); //how to find ptype occurrences
 
-		public static readonly Model[] All = { SixPart, Line };
+
+		public static readonly Model[] All = { SixPart, Line, NinePart };
 
 		public static Model Get(string name){
 			foreach(Model m in All)

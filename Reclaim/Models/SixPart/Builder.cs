@@ -31,7 +31,7 @@ namespace Reclaim.Models.SixPart
 				}
 				else if (extracted is Region)
 					regions.Add(name, (Region) extracted);
-				else if (extracted != null) 
+				else 
 					regions.Add(name, ((BackgroundResults)extracted).Region);
 			}
 

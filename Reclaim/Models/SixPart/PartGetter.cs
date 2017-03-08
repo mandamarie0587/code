@@ -76,23 +76,8 @@ namespace Reclaim.Models.SixPart
 
 			parts.Add("interior", new Part(interiortypes));
 
-			//parts.Add("topignore", new Part(GetIgnoreValues()));
-			//parts.Add("bottomignore", new Part(GetIgnoreValues())); 
-			//parts.Add("leftignore", new Part(GetIgnoreValues()));
-			//parts.Add("rightignore", new Part(GetIgnoreValues()));
-
-
 			return parts;
 		}
-
-		//private ArrayList GetIgnoreValues()
-		//{
-		//	ArrayList ignoreValues = new ArrayList();
-		//	ignoreValues.Add(0);
-		//	ignoreValues.Add(1);
-		//	//ignoreValues.Add(2);
-		//	return ignoreValues;
-		//}
 
 		private ArrayList GetCornerValues(int smallestWidth, int smallestHeight, int maxCornerSize)
 		{
@@ -129,11 +114,8 @@ namespace Reclaim.Models.SixPart
 					{
 						for (int right = min.End; right <= max.End; right++)
 						{
-							//if (left == right) // Assume the rectangle is symmetrical so left and right can be the same
-							//{
-								object value = new RegionParameters(type, left, right, depth);
-								values.Add(value);
-						//	}
+							object value = new RegionParameters(type, left, right, depth);
+							values.Add(value);
 						}
 					}
 				}
@@ -159,7 +141,7 @@ namespace Reclaim.Models.SixPart
 				smallerSide = maxHeight;
 			}
 
-			return smallerSide /2;
+			return smallerSide / 4;
 		}
 
 

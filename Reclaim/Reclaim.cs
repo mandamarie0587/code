@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using PrefabModels = PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers.Prototypes;
 using ReclaimModels = Reclaim.Models;
-using Reclaim.Models.Line;
-using Reclaim.Models.SixPart; 
 using Newtonsoft.Json;
 
 

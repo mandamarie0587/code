@@ -225,12 +225,12 @@ namespace PrefabIdentificationLayers.Models
             }
 
 			///// Debugging
-			string assigned = ""; 
-			foreach (Part p in parts)
-			{
-				assigned = assigned + "," + p.AssignedValue.ToString(); 
-			}
-			System.Console.WriteLine(assigned); 
+			//string assigned = ""; 
+			//foreach (Part p in parts)
+			//{
+			//	assigned = assigned + "," + p.AssignedValue.ToString(); 
+			//}
+			//System.Console.WriteLine(assigned); 
 
             return true;
         }

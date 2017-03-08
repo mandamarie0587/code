@@ -403,8 +403,8 @@ namespace Reclaim.Models.SixPart
 			bv.BottomRight = (Size)assignment["corner"].AssignedValue;
 			bv.Top = ((RegionParameters)assignment["top"].AssignedValue).Depth;
 			bv.Left = ((RegionParameters)assignment["left"].AssignedValue).Depth;
-			bv.Bottom = ((RegionParameters)assignment["top"].AssignedValue).Depth;
-			bv.Right = ((RegionParameters)assignment["left"].AssignedValue).Depth;
+			bv.Bottom = ((RegionParameters)assignment["bottom"].AssignedValue).Depth;
+			bv.Right = ((RegionParameters)assignment["right"].AssignedValue).Depth;
 
 			return bv;
 		}

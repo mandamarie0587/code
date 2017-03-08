@@ -13,7 +13,6 @@ namespace Reclaim.Models.SixPart
 		private CostFunction() { }
 
 
-		public readonly static string[] ignoreRegions = new string[] { "topignore", "bottomignore", "leftignore", "rightignore" }; 
 		public readonly static CostFunction Instance = new CostFunction();
 
 
@@ -30,15 +29,10 @@ namespace Reclaim.Models.SixPart
 
 
 					//if we couldn't extract the part - return null
-					if (Array.IndexOf(ignoreRegions, name) >= 0)
-					{
-						total += 0; 
-					}
-					else if (extracted == null)
+					if (extracted == null)
 					{
 						return Double.PositiveInfinity;
 					}
-
 
 					//if we did extract a part - let's return it's values
 					double partcost = 0;
@@ -47,7 +41,7 @@ namespace Reclaim.Models.SixPart
 						partcost = ((Bitmap)extracted).PixelCount();
 					else if (extracted is Region)
 						partcost = ((Region)extracted).Bitmap.PixelCount();
-					else if (extracted != null)
+					else 
 						partcost = ((BackgroundResults)extracted).Missed + ((BackgroundResults)extracted).Region.Bitmap.PixelCount();
 
 					total += partcost;
@@ -103,11 +97,6 @@ namespace Reclaim.Models.SixPart
 							return biggest.Bitmap.PixelCount() + biggest.Bitmap.Width;
 					}
 					break;
-			}
-
-			if (Array.IndexOf(ignoreRegions, name) >= 0)
-			{
-				return 0; 
 			}
 
 			return 1;

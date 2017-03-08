@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace PrefabIdentificationLayers.Models.NinePart
 {
-	internal class PartGetter : IPartGetter, IConstraintGetter
+	public class PartGetter : IPartGetter, IConstraintGetter
 	{
 
 		private const int c_maxCornerSize = 6;

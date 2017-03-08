@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using PrefabIdentificationLayers.Models;
 using Prefab;
@@ -9,7 +8,7 @@ namespace Reclaim.Models
 	class NextPartSelecter : IPartOrderSelecter
 	{
 		public static readonly NextPartSelecter Instance = new NextPartSelecter();
-		private NextPartSelecter(){}
+		private NextPartSelecter() { }
 		public Part SelectNextPartToAssign(Dictionary<string, Part> parts, IEnumerable<Bitmap> positives, IEnumerable<Bitmap> negatives)
 		{
 			IEnumerable<Part> excludingInterior = parts.Values.Where((p) => p != parts["interior"]);
