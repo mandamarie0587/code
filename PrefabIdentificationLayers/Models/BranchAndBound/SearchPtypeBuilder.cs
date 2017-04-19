@@ -222,15 +222,7 @@ namespace PrefabIdentificationLayers.Models
             {
                 if (!p.IsAssigned)
                     return false;
-            }
-
-			///// Debugging
-			//string assigned = ""; 
-			//foreach (Part p in parts)
-			//{
-			//	assigned = assigned + "," + p.AssignedValue.ToString(); 
-			//}
-			//System.Console.WriteLine(assigned); 
+            } 
 
             return true;
         }

@@ -1,3 +1,4 @@
+.gitignore
 *.dll
 *.pdb
 *.mdb
@@ -6,3 +7,5 @@
 */obj
 */bin
 packages/
+*.userprefs
+*.user

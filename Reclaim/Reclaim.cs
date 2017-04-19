@@ -85,7 +85,6 @@ namespace Reclaim
 									results.Add(newShape);
 									watch.Stop();
 									var elapsedS = (watch.ElapsedMilliseconds / 1000);
-								//	Console.WriteLine("time elapsed: " + elapsedS.ToString());
 									break;
 								}
 
