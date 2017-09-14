@@ -6,13 +6,16 @@ using PrefabModels = PrefabIdentificationLayers.Models;
 using PrefabIdentificationLayers.Prototypes;
 using ReclaimModels = Reclaim.Models;
 using Newtonsoft.Json;
-
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace Reclaim
 {
 	public class ReclaimBitmap
 	{
-		public static RGB GetColor(Bitmap bitmap)
+		public static RGB GetColor(Prefab.Bitmap bitmap)
 		{
 			int numPixels = bitmap.Pixels.Length;
 			int r = 0;
@@ -21,9 +24,9 @@ namespace Reclaim
 			for (int i = 0; i < bitmap.Pixels.Length; i++)
 			{
 				int pixelValue = bitmap.Pixels[i];
-				r += Bitmap.Red(pixelValue);
-				g += Bitmap.Green(pixelValue);
-				b += Bitmap.Blue(pixelValue);
+				r += Prefab.Bitmap.Red(pixelValue);
+				g += Prefab.Bitmap.Green(pixelValue);
+				b += Prefab.Bitmap.Blue(pixelValue);
 			}
 
 			r = (r / numPixels);
@@ -65,7 +68,35 @@ namespace Reclaim
 					try
 					{
 						// Create a new Bitmap 
-						Bitmap bitmap = Bitmap.FromFile(args[i]);
+						Prefab.Bitmap bitmap = Prefab.Bitmap.FromFile(args[i]);
+						bool wasResized = false;
+						double resizeRatio = 1.0; 
+						if(bitmap.Width > bitmap.Height) 
+						{
+							if (bitmap.Width > 100) {
+								int newWidth = 100;
+								resizeRatio = (double)newWidth/(double)bitmap.Width;
+								int newHeight = (int)(resizeRatio*bitmap.Height);
+
+								System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
+								System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
+								bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);
+							}
+						}
+						else 
+						{
+							if (bitmap.Height > 100) {
+								int newHeight = 100;
+								resizeRatio = (double)newHeight/(double)bitmap.Height;
+
+								int newWidth = (int)resizeRatio*bitmap.Width;
+								System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
+								System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
+								bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);
+							}
+						}
+
+
 						List<string> models = new List<string>();
 						models.Add("sixpart");
 						//models.Add("line"); 
@@ -81,7 +112,7 @@ namespace Reclaim
 								string id = GetIDFromFilename(args[i]);
 								if (id.Length > 0)
 								{
-									Shape newShape = ConvertPrototypeToJson(model, result, id);
+									Shape newShape = ConvertPrototypeToJson(model, result, id, resizeRatio);
 									results.Add(newShape);
 									watch.Stop();
 									var elapsedS = (watch.ElapsedMilliseconds / 1000);
@@ -124,13 +155,13 @@ namespace Reclaim
 		}
 
 		// construct prototype args from thew bitmap image
-		public static PrefabModels.BuildPrototypeArgs GetPrototypeArgsForImage(Bitmap bitmap, PrefabModels.Model model)
+		public static PrefabModels.BuildPrototypeArgs GetPrototypeArgsForImage(Prefab.Bitmap bitmap, PrefabModels.Model model)
 		{
 			string id = Guid.NewGuid().ToString();
 
 			// Build list of examples. There will just be 
-			List<Bitmap> positives = new List<Bitmap>();
-			List<Bitmap> negatives = new List<Bitmap>();
+			List<Prefab.Bitmap> positives = new List<Prefab.Bitmap>();
+			List<Prefab.Bitmap> negatives = new List<Prefab.Bitmap>();
 			positives.Add(bitmap);
 			PrefabModels.Examples examples = new PrefabModels.Examples(positives, negatives); 
 			PrefabModels.BuildPrototypeArgs args = new PrefabModels.BuildPrototypeArgs(examples, model, id);
@@ -138,21 +169,21 @@ namespace Reclaim
 			return args;
 		}
 
-		public static Shape ConvertPrototypeToJson(string model, Ptype.Mutable prototype, string id)
+		public static Shape ConvertPrototypeToJson(string model, Ptype.Mutable prototype, string id, double resizeRatio=1.0)
 		{
 			if (model == "sixpart")
 			{
-				return ConvertRectangleToJson(prototype, new Rectangle(id));
+				return ConvertRectangleToJson(prototype, new Rectangle(id), resizeRatio);
 			}
 			else if (model == "line")
 			{
-				return ConvertLineToJson(prototype, new Line(id));
+				return ConvertLineToJson(prototype, new Line(id), resizeRatio);
 			}
 
 			return null; 
 		}
 
-		public static Line ConvertLineToJson(Ptype.Mutable prototype, Line myLine)
+		public static Line ConvertLineToJson(Ptype.Mutable prototype, Line myLine, double resizeRatio=1.0)
 		{
 			// Get the thickness of the line
 			PrefabIdentificationLayers.Regions.Region interior = null;
@@ -169,13 +200,18 @@ namespace Reclaim
 			return myLine; 
 		}
 
-		public static Rectangle ConvertRectangleToJson(Ptype.Mutable prototype, Rectangle myRectangle)
+		public static Rectangle ConvertRectangleToJson(Ptype.Mutable prototype, Rectangle myRectangle, double resizeRatio=1.0)
 		{
 			// Corner radius
-			Bitmap corner = null;
+			Prefab.Bitmap corner = null;
 			if (prototype.Features.TryGetValue("corner", out corner))
 			{
 				int cornerRadius = (corner.Height + corner.Width) / 2;
+				if(resizeRatio != 1.0) 
+				{
+					cornerRadius = (int)((double)cornerRadius/resizeRatio);
+				}
+
 				myRectangle.BorderRadius.Corner = cornerRadius;
 			}
 
@@ -217,6 +253,10 @@ namespace Reclaim
 
 			// Average all border widths because they can't be set separately anyway
 			myRectangle.BorderWidth = (topHeight + bottomHeight + leftWidth + rightWidth) / 4;
+			if(resizeRatio != 1.0) 
+			{
+				myRectangle.BorderWidth = (int)((double)myRectangle.BorderWidth/resizeRatio);
+			}
 
 			if (borderColors.Count > 0)
 			{
@@ -236,12 +276,53 @@ namespace Reclaim
 			}
 			myRectangle.FillColor = fillColor;
 
+			if (myRectangle.FillColor.Red == myRectangle.BorderColor.Red && myRectangle.FillColor.Green == myRectangle.BorderColor.Green 
+				&&  myRectangle.FillColor.Blue == myRectangle.BorderColor.Blue) 
+			{
+				// Collapse the border into the rectangle if they are the exact same color
+				myRectangle.BorderWidth = 0;
+				myRectangle.BorderColor = null;
+			}
+
 			return myRectangle; 
 		}
 
 		private static void FailedToLoad(string filename, Exception e)
 		{
 			Console.WriteLine(e.StackTrace);
+		}
+
+		/// <summary>
+		/// Resize the image to the specified width and height.
+		/// </summary>
+		/// <param name="image">The image to resize.</param>
+		/// <param name="width">The width to resize to.</param>
+		/// <param name="height">The height to resize to.</param>
+		/// <returns>The resized image.</returns>
+		public static System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap image, int width, int height)
+		{
+
+		    var destRect = new System.Drawing.Rectangle(0, 0, width, height);
+		    var destImage = new System.Drawing.Bitmap(width, height);
+
+		    destImage.SetResolution(width,height);
+
+		    using (var graphics = Graphics.FromImage(destImage))
+		    {
+		        graphics.CompositingMode = CompositingMode.SourceCopy;
+		        graphics.CompositingQuality = CompositingQuality.HighQuality;
+		        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+		        graphics.SmoothingMode = SmoothingMode.HighQuality;
+		        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+		        using (var wrapMode = new ImageAttributes())
+		        {
+		            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+		            graphics.DrawImage(image, destRect, 0, 0, image.Width,image.Height, GraphicsUnit.Pixel, wrapMode);
+		        }
+		    }
+
+		    return destImage;
 		}
 	}
 }
