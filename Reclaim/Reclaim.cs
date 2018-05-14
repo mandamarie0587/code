@@ -73,26 +73,30 @@ namespace Reclaim
 						double resizeRatio = 1.0; 
 						if(bitmap.Width > bitmap.Height) 
 						{
-							if (bitmap.Width > 100) {
+							if (bitmap.Width > 100 && bitmap.Height > 10) {
 								int newWidth = 100;
 								resizeRatio = (double)newWidth/(double)bitmap.Width;
 								int newHeight = (int)(resizeRatio*bitmap.Height);
 
-								System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
-								System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
-								bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);
+								if(newWidth > 0 && newHeight > 0) {
+									System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
+									System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
+									bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);									
+								}
 							}
 						}
 						else 
 						{
-							if (bitmap.Height > 100) {
+							if (bitmap.Height > 100 && bitmap.Width > 10) {
 								int newHeight = 100;
 								resizeRatio = (double)newHeight/(double)bitmap.Height;
 
 								int newWidth = (int)resizeRatio*bitmap.Width;
-								System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
-								System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
-								bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);
+								if(newWidth > 0 && newHeight > 0) {
+									System.Drawing.Bitmap orig = Prefab.Bitmap.ToSystemDrawingBitmap(bitmap);
+									System.Drawing.Bitmap resized = ResizeImage(orig, newWidth, newHeight);
+									bitmap = Prefab.Bitmap.FromSystemDrawingBitmap(resized);
+								}
 							}
 						}
 
@@ -301,12 +305,14 @@ namespace Reclaim
 		/// <returns>The resized image.</returns>
 		public static System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap image, int width, int height)
 		{
+	    	Console.WriteLine(width); 
+		    Console.WriteLine(height);
 
 		    var destRect = new System.Drawing.Rectangle(0, 0, width, height);
 		    var destImage = new System.Drawing.Bitmap(width, height);
 
 		    destImage.SetResolution(width,height);
-
+	
 		    using (var graphics = Graphics.FromImage(destImage))
 		    {
 		        graphics.CompositingMode = CompositingMode.SourceCopy;
